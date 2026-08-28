@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumina ✨ Experiencia Interactiva</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --hue: 260;
+      --primary: hsl(var(--hue), 90%, 65%);
+      --primary-glow: hsl(var(--hue), 90%, 65%, 0.4);
+      --secondary: hsl(calc(var(--hue) + 60), 95%, 60%);
+      --bg-dark: #080914;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Fondo Interactivo Canvas */
+    #canvas-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: all;
+    }
+
+    /* Aurora Glows */
+    .aurora-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.35;
+      animation: float 18s ease-in-out infinite alternate;
+      transition: background 0.8s ease;
+    }
+
+    .blob-1 {
+      width: 550px;
+      height: 550px;
+      top: -100px;
+      left: -100px;
+      background: var(--primary);
+    }
+
+    .blob-2 {
+      width: 500px;
+      height: 500px;
+      bottom: -100px;
+      right: -100px;
+      background: var(--secondary);
+      animation-duration: 22s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(80px, 60px) scale(1.15); }
+      100% { transform: translate(-50px, 90px) scale(0.95); }
+    }
+
+    /* Contenedor Principal */
+    .app-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1150px;
+      padding: 2rem 1.5rem 6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3.5rem;
+    }
+
+    /* Header y Barra Superior */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.4rem;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 0.55rem;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-icon:hover {
+      background: var(--primary);
+      color: #000;
+      transform: scale(1.1) rotate(6deg);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .btn-icon.active {
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      max-width: 800px;
+      margin-top: 1.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--primary-glow);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      animation: pulseGlow 3s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(var(--primary), 0.2); }
+      50% { box-shadow: 0 0 28px var(--primary-glow); }
+    }
+
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 10%, var(--primary) 60%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 20px var(--primary-glow));
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      font-weight: 300;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #05060f;
+      font-weight: 700;
+      padding: 0.85rem 2rem;
+      border-radius: 9999px;
+      border: none;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 25px var(--primary-glow);
+    }
+
+    .btn-main:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 15px 35px var(--primary-glow);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 0.85rem 1.8rem;
+      border-radius: 9999px;
+      border: 1px solid var(--card-border);
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Grid de Experiencias / Tarjetas 3D */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      width: 100%;
+      perspective: 1200px;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 2.2rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      transition: 0.6s ease;
+      pointer-events: none;
+    }
+
+    .glass-card:hover::before {
+      left: 100%;
+    }
+
+    .glass-card:hover {
+      border-color: var(--primary-glow);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px var(--primary-glow);
+    }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      margin-bottom: 1.4rem;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover .card-icon {
+      background: var(--primary);
+      color: #000;
+      transform: scale(1.12) rotate(-5deg);
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    /* Widgets Interactivos dentro de tarjetas */
+    /* Widget 1: Generador de Ideas */
+    .idea-box {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.95rem;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-style: italic;
+      color: #e2e8f0;
+      position: relative;
+    }
+
+    .btn-action {
+      margin-top: 1rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid var(--card-border);
+      padding: 0.75rem;
+      border-radius: 12px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    /* Widget 2: Piano / Sintetizador */
+    .synth-pad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .synth-key {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.1rem 0.5rem;
+      border-radius: 12px;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .synth-key:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .synth-key:active, .synth-key.playing {
+      background: var(--secondary);
+      color: #000;
+      transform: scale(0.92);
+      box-shadow: 0 0 15px var(--secondary);
+    }
+
+    /* Widget 3: Contador de Clics Gravitatorio */
+    .physics-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: var(--primary);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Selector de Colores / Temas Flotante */
+    .theme-bar {
+      position: fixed;
+      bottom: 2rem;
+      background: rgba(18, 20, 36, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .palette-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.25s ease;
+    }
+
+    .palette-btn:hover {
+      transform: scale(1.25);
+    }
+
+    .palette-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    /* Footer */
+    footer {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 2rem;
+    }
+
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #10b981;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 1.5rem 1rem 5rem;
+        gap: 2.5rem;
+      }
+      .hero-title {
+        font-size: 2.3rem;
+      }
+      .grid-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Canvas de Fondo con Partículas Interactivas -->
+  <canvas id="canvas-bg"></canvas>
+
+  <!-- Efectos de Luz Aurora -->
+  <div class="aurora-container">
+    <div class="aurora-blob blob-1" id="blob-1"></div>
+    <div class="aurora-blob blob-2" id="blob-2"></div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- Barra Superior -->
+    <header>
+      <div class="logo">
+        <i data-lucide="sparkles"></i>
+        <span>LUMINA</span>
+      </div>
+      <div class="top-controls">
+        <button class="btn-icon" id="btn-audio" title="Activar/Desactivar Efectos de Sonido">
+          <i data-lucide="volume-2" id="audio-icon"></i>
+        </button>
+        <button class="btn-icon" id="btn-randomize" title="Explosión de partículas">
+          <i data-lucide="zap"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sección Principal (Hero) -->
+    <main class="hero">
+      <div class="badge">
+        <i data-lucide="compass" style="width: 15px; height: 15px;"></i>
+        <span>Experiencia Web Interactiva</span>
+      </div>
+
+      <h1 class="hero-title">
+        El futuro es interactivo, <br>
+        <span class="gradient-text">creativo y sin límites.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Pasa el ratón sobre el fondo, experimenta con las tarjetas 3D, toca notas musicales o cambia la armonía visual en tiempo real.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn-main" id="btn-burst">
+          <i data-lucide="flame"></i>
+          <span>Lanzar Fuegos Artificiales</span>
+        </button>
+        <button class="btn-outline" id="btn-quote-trigger">
+          <i data-lucide="wand-2"></i>
+          <span>Inspiración Aleatoria</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Grid de Tarjetas Interactivas con Efecto Tilt 3D -->
+    <section class="grid-cards">
+      
+      <!-- Tarjeta 1: Oráculo de Ideas -->
+      <div class="glass-card" data-tilt>
+        <div class="card-icon">
+          <i data-lucide="brain"></i>
+        </div>
+        <h2 class="card-title">Oráculo Creativo</h2>
+        <p class="card-desc">
+          Pulsa el botón para generar chispas de ideas e inspiración instantáneas con un solo toque.
+        </p>
+        <div class="idea-box" id="idea-display">
+          "El código es poesía ejecutada por la luz de la pantalla."
+        </div>
+        <button class="btn-action" id="btn-new-idea">
+          <i data-lucide="refresh-cw"></i>
+          <span>Nueva Idea</span>
+        </button>
+      </div>
+
+      <!-- Tarjeta 2: Sintetizador Web -->
+      <div class="glass-card" data-tilt>
+        <div class="card-icon">
+          <i data-lucide="music"></i>
+        </div>
+        <h2 class="card-title">Mini Sintetizador</h2>
+        <p class="card-desc">
+          Toca las notas generadas mediante la API de Web Audio pura, sin archivos externos ni descargas.
+        </p>
+        <div class="synth-pad">
+          <button class="synth-key" data-freq="261.63">Do</button>
+          <button class="synth-key" data-freq="293.66">Re</button>
+          <button class="synth-key" data-freq="329.63">Mi</button>
+          <button class="synth-key" data-freq="349.23">Fa</button>
+          <button class="synth-key" data-freq="392.00">Sol</button>
+          <button class="synth-key" data-freq="440.00">La</button>
+          <button class="synth-key" data-freq="493.88">Si</button>
+          <button class="synth-key" data-freq="523.25">Do⁺</button>
+        </div>
+        <button class="btn-action" id="btn-play-melody" style="margin-top: 1rem;">
+          <i data-lucide="play"></i>
+          <span>Melodía Automática</span>
+        </button>
+      </div>
+
+      <!-- Tarjeta 3: Telemetría & Gravedad -->
+      <div class="glass-card" data-tilt>
+        <div class="card-icon">
+          <i data-lucide="activity"></i>
+        </div>
+        <h2 class="card-title">Física & Telemetría</h2>
+        <p class="card-desc">
+          Métricas en tiempo real del motor gráfico y controles de interacción dinámica.
+        </p>
+        <div class="physics-panel">
+          <div class="stat-row">
+            <span>Partículas Activas:</span>
+            <span class="stat-value" id="particle-count">100</span>
+          </div>
+          <div class="stat-row">
+            <span>Posición Cursor:</span>
+            <span class="stat-value" id="cursor-pos">0, 0</span>
+          </div>
+          <div class="stat-row">
+            <span>Modo Gravedad:</span>
+            <span class="stat-value" id="gravity-status" style="color: #10b981;">Atracción</span>
+          </div>
+        </div>
+        <button class="btn-action" id="btn-toggle-gravity">
+          <i data-lucide="orbit"></i>
+          <span>Cambiar Modo Gravedad</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="badge-live">
+        <span class="dot"></span>
+        <span>Renderizado en tiempo real a 60 FPS</span>
+      </div>
+      <p>Creado para sorprender • HTML5, CSS3 & Canvas Interactivo</p>
+    </footer>
+
+  </div>
+
+  <!-- Barra Flotante de Selección de Color / Tema -->
+  <aside class="theme-bar" aria-label="Selector de Tema">
+    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Estilo:</span>
+    <div class="palette-btn active" style="background: #a855f7; color: #a855f7;" data-hue="260" title="Violeta Neón"></div>
+    <div class="palette-btn" style="background: #06b6d4; color: #06b6d4;" data-hue="190" title="Cyber Cyan"></div>
+    <div class="palette-btn" style="background: #f59e0b; color: #f59e0b;" data-hue="35" title="Solar Gold"></div>
+    <div class="palette-btn" style="background: #10b981; color: #10b981;" data-hue="155" title="Emerald Wave"></div>
+    <div class="palette-btn" style="background: #ec4899; color: #ec4899;" data-hue="330" title="Retro Synth"></div>
+  </aside>
+
+  <script>
+    // Inicializar Iconos Lucide
+    lucide.createIcons();
+
+    /* ==========================================================
+       1. MOTOR DE AUDIO WEB (Subtle generative audio synthesizer)
+       ========================================================== */
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.35, gainValue = 0.15) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        gain.gain.setValueAtTime(gainValue, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        console.warn("Audio Context aún no iniciado por gesto de usuario");
+      }
+    }
+
+    function playChime() {
+      if (!soundEnabled) return;
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'sine', 0.4, 0.08), idx * 80);
+      });
+    }
+
+    // Toggle Sonido
+    const btnAudio = document.getElementById('btn-audio');
+    const audioIcon = document.getElementById('audio-icon');
+    btnAudio.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      btnAudio.classList.toggle('active', soundEnabled);
+      audioIcon.setAttribute('data-lucide', soundEnabled ? 'volume-2' : 'volume-x');
+      lucide.createIcons();
+      if (soundEnabled) playChime();
+    });
+
+    /* ==========================================================
+       2. CANVAS DE PARTÍCULAS INTERACTIVAS CON FÍSICA
+       ========================================================== */
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    const particleCountEl = document.getElementById('particle-count');
+    const cursorPosEl = document.getElementById('cursor-pos');
+    const gravityStatusEl = document.getElementById('gravity-status');
+
+    let width, height;
+    let particles = [];
+    let fireworks = [];
+    let mouse = { x: -1000, y: -1000, radius: 160, isDown: false };
+    let gravityMode = 'attract'; // 'attract' o 'repel'
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x || Math.random() * width;
+        this.y = y || Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 1.2;
+        this.vy = (Math.random() - 0.5) * 1.2;
+        this.radius = Math.random() * 2.5 + 1;
+        this.baseRadius = this.radius;
+        this.alpha = Math.random() * 0.5 + 0.3;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Rebote en bordes
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+
+        // Interacción con ratón
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          const dirX = (dx / dist) * force * 3;
+          const dirY = (dy / dist) * force * 3;
+
+          if (gravityMode === 'attract') {
+            this.x += dirX;
+            this.y += dirY;
+          } else {
+            this.x -= dirX * 1.5;
+            this.y -= dirY * 1.5;
+          }
+          this.radius = this.baseRadius * 1.8;
+        } else {
+          if (this.radius > this.baseRadius) {
+            this.radius -= 0.05;
+          }
+        }
+      }
+
+      draw() {
+        const hue = getComputedStyle(document.documentElement).getPropertyValue('--hue').trim();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 90%, 70%, ${this.alpha})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = `hsla(${hue}, 90%, 60%, 0.8)`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    class Firework {
+      constructor(x, y) {
+        this.particles = [];
+        const count = 35;
+        const hue = Math.floor(Math.random() * 360);
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count;
+          const speed = Math.random() * 6 + 2;
+          this.particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1,
+            decay: Math.random() * 0.02 + 0.015,
+            hue: hue + Math.random() * 30,
+            radius: Math.random() * 3 + 1.5
+          });
+        }
+      }
+
+      update() {
+        this.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.08; // Gravedad
+          p.vx *= 0.96;
+          p.vy *= 0.96;
+          p.alpha -= p.decay;
+        });
+        this.particles = this.particles.filter(p => p.alpha > 0);
+      }
+
+      draw() {
+        this.particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${p.hue}, 95%, 65%, ${p.alpha})`;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = `hsla(${p.hue}, 95%, 65%, ${p.alpha})`;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+      }
+    }
+
+    // Inicializar Partículas
+    const NUM_PARTICLES = 95;
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+      particles.push(new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Dibujar líneas entre partículas cercanas (efecto constelación)
+      const hue = getComputedStyle(document.documentElement).getPropertyValue('--hue').trim();
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.15;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `hsla(${hue}, 80%, 70%, ${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Actualizar y dibujar partículas
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      // Actualizar fuegos artificiales
+      for (let i = fireworks.length - 1; i >= 0; i--) {
+        fireworks[i].update();
+        fireworks[i].draw();
+        if (fireworks[i].particles.length === 0) {
+          fireworks.splice(i, 1);
+        }
+      }
+
+      particleCountEl.textContent = particles.length + fireworks.reduce((acc, f) => acc + f.particles.length, 0);
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Eventos de Ratón en el Canvas
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      cursorPosEl.textContent = `${Math.round(mouse.x)}, ${Math.round(mouse.y)}`;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+      cursorPosEl.textContent = `Fuera de pantalla`;
+    });
+
+    window.addEventListener('click', (e) => {
+      // Si no es un botón ni tarjeta, lanza chispa
+      if (!e.target.closest('button') && !e.target.closest('.theme-bar') && !e.target.closest('.synth-key')) {
+        fireworks.push(new Firework(e.clientX, e.clientY));
+        playTone(600 + Math.random() * 400, 'triangle', 0.25, 0.05);
+      }
+    });
+
+    /* ==========================================================
+       3. EFECTO 3D TILT EN LAS TARJETAS (Vanilla Tilt Effect)
+       ========================================================== */
+    const cards = document.querySelectorAll('[data-tilt]');
+    cards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -10;
+        const rotateY = ((x - centerX) / centerX) * 10;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+      });
+    });
+
+    /* ==========================================================
+       4. INTERACTIVIDAD DE WIDGETS
+       ========================================================== */
+    // A) Oráculo de ideas
+    const ideas = [
+      "«La simplicidad es la máxima sofisticación.» — Leonardo da Vinci",
+      "«No te preocupes si no funciona a la primera, cada error es un paso al éxito.»",
+      "«El mejor código es aquel que inspira a otros a crear.»",
+      "«La creatividad es la inteligencia divirtiéndose.» — Albert Einstein",
+      "«Las grandes ideas nacen de pequeños experimentos valientes.»",
+      "«Hazlo funcionar, hazlo hermoso, hazlo memorable.»"
+    ];
+    let currentIdeaIdx = 0;
+    const ideaDisplay = document.getElementById('idea-display');
+    const btnNewIdea = document.getElementById('btn-new-idea');
+    const btnQuoteTrigger = document.getElementById('btn-quote-trigger');
+
+    function showNextIdea() {
+      currentIdeaIdx = (currentIdeaIdx + 1) % ideas.length;
+      ideaDisplay.style.opacity = '0';
+      ideaDisplay.style.transform = 'translateY(10px)';
+      ideaDisplay.style.transition = 'all 0.3s ease';
+
+      playTone(550, 'sine', 0.2, 0.08);
+
+      setTimeout(() => {
+        ideaDisplay.textContent = ideas[currentIdeaIdx];
+        ideaDisplay.style.opacity = '1';
+        ideaDisplay.style.transform = 'translateY(0)';
+      }, 300);
+    }
+
+    btnNewIdea.addEventListener('click', showNextIdea);
+    btnQuoteTrigger.addEventListener('click', showNextIdea);
+
+    // B) Sintetizador Web
+    const synthKeys = document.querySelectorAll('.synth-key');
+    synthKeys.forEach(key => {
+      const playKey = () => {
+        const freq = parseFloat(key.dataset.freq);
+        playTone(freq, 'triangle', 0.4, 0.2);
+        key.classList.add('playing');
+        setTimeout(() => key.classList.remove('playing'), 200);
+      };
+      key.addEventListener('mousedown', playKey);
+      key.addEventListener('touchstart', (e) => { e.preventDefault(); playKey(); });
+    });
+
+    // Melodía Automática
+    const btnPlayMelody = document.getElementById('btn-play-melody');
+    btnPlayMelody.addEventListener('click', () => {
+      const melody = [
+        { note: 261.63, time: 0 },
+        { note: 329.63, time: 200 },
+        { note: 392.00, time: 400 },
+        { note: 523.25, time: 600 },
+        { note: 440.00, time: 850 },
+        { note: 523.25, time: 1100 }
+      ];
+      melody.forEach(item => {
+        setTimeout(() => {
+          playTone(item.note, 'sine', 0.45, 0.18);
+          // Efecto visual en la tecla
+          const targetKey = Array.from(synthKeys).find(k => Math.abs(parseFloat(k.dataset.freq) - item.note) < 1);
+          if (targetKey) {
+            targetKey.classList.add('playing');
+            setTimeout(() => targetKey.classList.remove('playing'), 200);
+          }
+        }, item.time);
+      });
+    });
+
+    // C) Botón de Lanzar Fuegos Artificiales
+    const btnBurst = document.getElementById('btn-burst');
+    btnBurst.addEventListener('click', () => {
+      for (let i = 0; i < 4; i++) {
+        setTimeout(() => {
+          const randX = Math.random() * (width * 0.8) + width * 0.1;
+          const randY = Math.random() * (height * 0.6) + height * 0.15;
+          fireworks.push(new Firework(randX, randY));
+          playTone(500 + i * 150, 'triangle', 0.35, 0.12);
+        }, i * 200);
+      }
+    });
+
+    // D) Botón Randomize / Zap
+    const btnRandomize = document.getElementById('btn-randomize');
+    btnRandomize.addEventListener('click', () => {
+      particles.forEach(p => {
+        p.vx = (Math.random() - 0.5) * 10;
+        p.vy = (Math.random() - 0.5) * 10;
+      });
+      playChime();
+    });
+
+    // E) Toggle Gravedad
+    const btnToggleGravity = document.getElementById('btn-toggle-gravity');
+    btnToggleGravity.addEventListener('click', () => {
+      if (gravityMode === 'attract') {
+        gravityMode = 'repel';
+        gravityStatusEl.textContent = 'Repulsión';
+        gravityStatusEl.style.color = '#f43f5e';
+      } else {
+        gravityMode = 'attract';
+        gravityStatusEl.textContent = 'Atracción';
+        gravityStatusEl.style.color = '#10b981';
+      }
+      playTone(400, 'sawtooth', 0.15, 0.08);
+    });
+
+    /* ==========================================================
+       5. SELECTOR DE TEMAS & PALETAS DE COLOR DINÁMICAS
+       ========================================================== */
+    const paletteButtons = document.querySelectorAll('.palette-btn');
+    paletteButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        paletteButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const newHue = btn.dataset.hue;
+        document.documentElement.style.setProperty('--hue', newHue);
+        playTone(700, 'sine', 0.2, 0.06);
+      });
+    });
+  </script>
+</body>
+</html>
